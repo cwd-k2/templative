@@ -27,15 +27,15 @@ func main() {
 		Progress: os.Stdout,
 	})
 
-	dstDir, err := filepath.Abs(os.Args[2])
+	dstdir, err := filepath.Abs(os.Args[2])
 	if err != nil {
 		panic(err)
 	}
 
 	src := gvfs.NewRoot(templatepath)
-	dst := gvfs.NewRoot(dstDir)
+	dst := gvfs.NewRoot(dstdir)
 
-	dir, err := src.ToItem(regexp.MustCompile(`\.git`))
+	dir, err := src.ToItem(regexp.MustCompile(`\.git$`))
 	if err != nil {
 		panic(err)
 	}
@@ -50,6 +50,5 @@ func main() {
 
 func usage() {
 	fmt.Fprintln(os.Stderr, `usage: tp <owner>/<repo> <directory-name>`)
-
 	os.Exit(1)
 }
