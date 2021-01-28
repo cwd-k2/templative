@@ -3,12 +3,12 @@ package main
 import (
 	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"regexp"
 
 	"github.com/cwd-k2/gvfs"
-	"github.com/cwd-k2/templative/pkg/constants"
+	"github.com/go-git/go-git/v5"
+	"github.com/google/uuid"
 )
 
 func main() {
@@ -16,30 +16,23 @@ func main() {
 		usage()
 	}
 
-	TEMPLATIVE_DIR := constants.TemplativeDir()
-
-	if _, err := os.Stat(TEMPLATIVE_DIR); os.IsNotExist(err) {
-		os.Mkdir(TEMPLATIVE_DIR, os.ModePerm)
+	uuidobj, err := uuid.NewUUID()
+	if err != nil {
+		panic(err)
 	}
+	templatepath := filepath.Join(os.TempDir(), "templattive", uuidobj.String())
 
-	templatePath := filepath.Join(TEMPLATIVE_DIR, os.Args[1]) + string(filepath.Separator)
-
-	if _, err := os.Stat(templatePath); os.IsNotExist(err) {
-		repo := "https://github.com/" + os.Args[1]
-
-		cmd := exec.Command("git", "clone", repo, templatePath)
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-
-		cmd.Run()
-	}
+	git.PlainClone(templatepath, false, &git.CloneOptions{
+		URL:      "https://github.com/" + os.Args[1],
+		Progress: os.Stdout,
+	})
 
 	dstDir, err := filepath.Abs(os.Args[2])
 	if err != nil {
 		panic(err)
 	}
 
-	src := gvfs.NewRoot(templatePath)
+	src := gvfs.NewRoot(templatepath)
 	dst := gvfs.NewRoot(dstDir)
 
 	dir, err := src.ToItem(regexp.MustCompile(`\.git`))
