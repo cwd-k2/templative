@@ -2,13 +2,13 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
 
 	"github.com/cwd-k2/gvfs"
 	"github.com/go-git/go-git/v5"
-	"github.com/google/uuid"
 )
 
 func main() {
@@ -16,11 +16,10 @@ func main() {
 		usage()
 	}
 
-	uuidobj, err := uuid.NewUUID()
+	templatepath, err := ioutil.TempDir("", "templative-")
 	if err != nil {
 		panic(err)
 	}
-	templatepath := filepath.Join(os.TempDir(), "templative", uuidobj.String())
 
 	git.PlainClone(templatepath, false, &git.CloneOptions{
 		URL:      "https://github.com/" + os.Args[1],
