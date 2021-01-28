@@ -36,11 +36,10 @@ func main() {
 		panic(err)
 	}
 
-	dst := gvfs.NewDirectory(filepath.Base(dstdir))
-	dst.Contents = src.Contents
-
-	if err := dst.Commit(filepath.Dir(dstdir)); err != nil {
-		println(err.Error())
+	for _, content := range src.Contents {
+		if err := content.Commit(dstdir); err != nil {
+			println(err.Error())
+		}
 	}
 }
 
