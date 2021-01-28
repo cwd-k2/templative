@@ -20,7 +20,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	templatepath := filepath.Join(os.TempDir(), "templattive", uuidobj.String())
+	templatepath := filepath.Join(os.TempDir(), "templative", uuidobj.String())
 
 	git.PlainClone(templatepath, false, &git.CloneOptions{
 		URL:      "https://github.com/" + os.Args[1],
@@ -32,20 +32,17 @@ func main() {
 		panic(err)
 	}
 
-	src := gvfs.NewRoot(templatepath)
-	dst := gvfs.NewRoot(dstdir)
-
-	dir, err := src.ToItem(regexp.MustCompile(`\.git$`))
+	src, err := gvfs.Traverse(templatepath, regexp.MustCompile(`\.git$`))
 	if err != nil {
 		panic(err)
 	}
 
-	for _, content := range dir.Contents {
-		if err := dst.WriteItem(content); err != nil {
-			println(err)
-		}
-	}
+	dst := gvfs.NewDirectory(filepath.Base(dstdir))
+	dst.Contents = src.Contents
 
+	if err := dst.Commit(filepath.Dir(dstdir)); err != nil {
+		println(err.Error())
+	}
 }
 
 func usage() {
