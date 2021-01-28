@@ -5,7 +5,9 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 
+	"github.com/cwd-k2/gvfs"
 	"github.com/cwd-k2/templative/pkg/constants"
 )
 
@@ -17,7 +19,7 @@ func main() {
 	TEMPLATIVE_DIR := constants.TemplativeDir()
 
 	if _, err := os.Stat(TEMPLATIVE_DIR); os.IsNotExist(err) {
-		os.Mkdir(TEMPLATIVE_DIR, 0755)
+		os.Mkdir(TEMPLATIVE_DIR, os.ModePerm)
 	}
 
 	templatePath := filepath.Join(TEMPLATIVE_DIR, os.Args[1]) + string(filepath.Separator)
@@ -32,13 +34,25 @@ func main() {
 		cmd.Run()
 	}
 
-	d, _ := filepath.Abs(os.Args[2])
+	dstDir, err := filepath.Abs(os.Args[2])
+	if err != nil {
+		panic(err)
+	}
 
-	cmd := exec.Command("rsync", "-av", "--cvs-exclude", templatePath, d)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+	src := gvfs.NewRoot(templatePath)
+	dst := gvfs.NewRoot(dstDir)
 
-	cmd.Run()
+	dir, err := src.ToItem(regexp.MustCompile(`\.git`))
+	if err != nil {
+		panic(err)
+	}
+
+	for _, content := range dir.Contents {
+		if err := dst.WriteItem(content); err != nil {
+			println(err)
+		}
+	}
+
 }
 
 func usage() {

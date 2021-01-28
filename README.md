@@ -9,7 +9,6 @@ go get -u github.com/cwd-k2/templative/cmd/...
 ## Prerequisites
 
 - `git`
-- `rsync`
 
 ## Run
 
