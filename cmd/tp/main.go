@@ -2,13 +2,13 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
 
 	"github.com/cwd-k2/gvfs"
 	"github.com/go-git/go-git/v5"
-	"github.com/google/uuid"
 )
 
 func main() {
@@ -16,40 +16,34 @@ func main() {
 		usage()
 	}
 
-	uuidobj, err := uuid.NewUUID()
+	templatepath, err := ioutil.TempDir("", "templative-")
 	if err != nil {
 		panic(err)
 	}
-	templatepath := filepath.Join(os.TempDir(), "templattive", uuidobj.String())
 
 	git.PlainClone(templatepath, false, &git.CloneOptions{
 		URL:      "https://github.com/" + os.Args[1],
 		Progress: os.Stdout,
 	})
 
-	dstDir, err := filepath.Abs(os.Args[2])
+	dstdir, err := filepath.Abs(os.Args[2])
 	if err != nil {
 		panic(err)
 	}
 
-	src := gvfs.NewRoot(templatepath)
-	dst := gvfs.NewRoot(dstDir)
-
-	dir, err := src.ToItem(regexp.MustCompile(`\.git`))
+	src, err := gvfs.Traverse(templatepath, regexp.MustCompile(`\.git$`))
 	if err != nil {
 		panic(err)
 	}
 
-	for _, content := range dir.Contents {
-		if err := dst.WriteItem(content); err != nil {
-			println(err)
+	for _, content := range src.Contents {
+		if err := content.Commit(dstdir); err != nil {
+			println(err.Error())
 		}
 	}
-
 }
 
 func usage() {
 	fmt.Fprintln(os.Stderr, `usage: tp <owner>/<repo> <directory-name>`)
-
 	os.Exit(1)
 }
