@@ -8,6 +8,7 @@ import (
 	"regexp"
 
 	"github.com/cwd-k2/gvfs"
+	"github.com/cwd-k2/templative/cmd/tp/subcmd"
 	"github.com/go-git/go-git/v5"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -21,6 +22,10 @@ var (
 		RunE: FromGitHub,
 	}
 )
+
+func init() {
+	cmd.AddCommand(subcmd.FromYaml)
+}
 
 func FromGitHub(_ *cobra.Command, args []string) error {
 	tmp, err := ioutil.TempDir("", "templative-")

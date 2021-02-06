@@ -1,0 +1,23 @@
+pkg: (directory)
+cmd/somecommand/main.go: |
+  package main
+
+  func main() {
+  	println("Hi")
+  }
+
+internal/pkg: (directory)
+internal/app: (directory)
+
+LICENSE: (file)
+Makefile: (file)
+README.md: (file)
+
+docs: (directory)
+test: (directory)
+build: (directory)
+tools: (directory)
+assets: (directory)
+configs: (directory)
+scripts: (directory)
+examples: (directory)
