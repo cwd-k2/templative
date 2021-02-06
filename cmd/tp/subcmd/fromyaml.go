@@ -48,8 +48,10 @@ func fromyaml(_ *cobra.Command, args []string) error {
 		return errors.WithStack(err)
 	}
 
-	parent, basename := filepath.Split(abstarget)
-	directory := gvfs.NewDirectory(basename)
+	var (
+		parent, basename = filepath.Split(abstarget)
+		directory        = gvfs.NewDirectory(basename)
+	)
 
 	for path, content := range structure {
 		switch content {
